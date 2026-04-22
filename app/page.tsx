@@ -4,12 +4,26 @@ import dynamic from 'next/dynamic';
 import { useState } from 'react';
 import Sidebar from '@/components/Sidebar';
 
-// Leaflet must be loaded client-side only (no SSR)
 const JmtMap = dynamic(() => import('@/components/JmtMap'), { ssr: false });
+
+export type FilterState = {
+  location: string;
+  status: string;
+  threats: string[];
+  layers: string[];
+};
+
+const DEFAULT_FILTERS: FilterState = {
+  location: 'all',
+  status: 'all',
+  threats: [],
+  layers: [],
+};
 
 export default function Home() {
   const [activeView, setActiveView] = useState<'properties' | 'jmw'>('properties');
   const [selectedPropId, setSelectedPropId] = useState<string | null>(null);
+  const [filters, setFilters] = useState<FilterState>(DEFAULT_FILTERS);
 
   return (
     <div style={{ display: 'flex', height: '100vh', width: '100vw', overflow: 'hidden' }}>
@@ -29,24 +43,24 @@ export default function Home() {
         </div>
       </div>
 
-      {/* Body (below header) */}
+      {/* Body */}
       <div style={{ display: 'flex', width: '100%', paddingTop: 60, height: '100%' }}>
-        {/* Sidebar */}
         <div style={{ flexShrink: 0, height: '100%' }}>
           <Sidebar
             activeView={activeView}
             onViewChange={setActiveView}
             selectedPropId={selectedPropId}
             onSelectProp={setSelectedPropId}
+            filters={filters}
+            onFiltersChange={setFilters}
           />
         </div>
-
-        {/* Map */}
-        <div style={{ flex: 1, position: 'relative', height: '100%' }}>
+        <div style={{ flex: 1, height: '100%', position: 'relative' }}>
           <JmtMap
             activeView={activeView}
             selectedPropId={selectedPropId}
             onSelectProp={setSelectedPropId}
+            filters={filters}
           />
         </div>
       </div>
